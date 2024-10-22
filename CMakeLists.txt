@@ -16,7 +16,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
 
 # Catch2 -- Unit test
 find_package(Catch2 3 REQUIRED)
-set(TEST_SOURCES test/allocator_test.cpp)
+set(TEST_SOURCES test/allocator_test.cpp test/iterator_test.cpp)
 add_executable(tests ${TEST_SOURCES})
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 target_include_directories(tests PRIVATE ${PROJECT_SOURCE_DIR}/include)

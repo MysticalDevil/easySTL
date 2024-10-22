@@ -1,32 +1,32 @@
 #pragma once
 
 #ifndef EASYSTL_ITERATOR_H_
-#define EASY_STL_ITERATOR_H_
+#define EASYSTL_ITERATOR_H_
 
 #include <cstddef>
 
 namespace easystl {
     /**
     * @class TrueType
-    * @brief Helper class for type traits, used to represent `true` in type checking.
+    * @brief Helper class for type traits, used to represent true in type checking.
     */
     class TrueType {
     public:
-        static constexpr bool value = true; ///< Constant `true` value.
+        static constexpr bool value = true; ///< Constant true value.
     };
 
     /**
     * @class FalseType
-    * @brief Helper class for type traits, used to represent `false` in type checking.
+    * @brief Helper class for type traits, used to represent false in type checking.
     */
     class FalseType {
     public:
-        static constexpr bool value = false; ///< Constant `false` value.
+        static constexpr bool value = false; ///< Constant false value.
     };
 
     /**
      * @typedef void_t
-     * @brief Helper alias template that resolves to `void` for SFINAE-based templated specialization.
+     * @brief Helper alias template that resolves to void for SFINAE-based templated specialization.
      */
     template<typename...>
     using void_t = void;
@@ -54,7 +54,7 @@ namespace easystl {
 
     /**
     * @class BidirectionalIteratorTag
-    * @brief Tag class representing the bidirectional iterator category, derived from FrowardIteratorTag.
+    * @brief Tag class representing the bidirectional iterator category, derived from ForwardIteratorTag.
     */
     class BidirectionalIteratorTag : public ForwardIteratorTag {
     };
@@ -71,29 +71,30 @@ namespace easystl {
     * @brief Template class representing a general iterator.
     * @tparam Category The category of the iterator (e.g., InputIteratorTag.).
     * @tparam T The type of the elements pointed to by the iterator.
-    * @tparam distance The difference type, representing the distance between two iterators.
+    * @tparam Distance The difference type, representing the distance between two iterators.
     * @tparam pointer The pointer type.
     * @tparam reference The reference type.
     */
     template<class Category,
         class T,
-        class distance = std::ptrdiff_t,
+        class Distance = std::ptrdiff_t,
         class pointer = T *,
         class reference = T &>
     class Iterator {
-        using IteratorCategory = Category; ///< The category type of the iterator.
-        using ValueType = T; ///< The value type of the iterator.
-        using Pointer = pointer; ///< The pointer for the iterator.
-        using Reference = reference; ///< The reference for the iterator.
-        using DifferenceType = distance; ///< The difference type, used for pointer arithmetic.
+    public:
+        using IteratorCategory = Category;
+        using ValueType = T;
+        using DifferenceType = Distance;
+        using Pointer = pointer;
+        using Reference = reference;
     };
 
     /**
     * @class IteratorTraits
     * @brief Traits class template for extracting iterator properties.
-    * Primary template for non-iterators (SFINAE fallback).
+    * Primary template for non-iterators (SFINAE fallback.).
     * @tparam T The type to be specialized.
-    * `void` Specialization parameter used for SFINAE.
+    * @tparam{unused} `void` Specialization parameter used for SFINAE.
     */
     template<class T, class = void>
     class IteratorTraits {
@@ -101,7 +102,7 @@ namespace easystl {
 
     /**
     * @class IteratorTraits
-    * @brief Specialization of IteratorTraits for types that define `IteratorTraits`.
+    * @brief Specialization of IteratorTraits for types that define IteratorTraits.
     * @tparam T A class type that defines iterator properties.
     */
     template<class T>
@@ -116,39 +117,42 @@ namespace easystl {
 
     /**
     * @class IteratorTraits
-    * @brief Specialization of IteratorTraits for pointer types.
+    * @brief Traits class template for extracting iterator properties.
+    * Specialization for pointer types.
     * @tparam T The type of the elements pointed to.
     */
     template<class T>
     class IteratorTraits<T *, void> {
     public:
-        using IteratorCategory = RandomAccessIteratorTag; ///< Iterator category for raw pointers.
-        using ValueType = T; ///< The value type of the pointer.
-        using Pointer = T *; ///< The pointer value.
-        using Reference = T &; ///< The reference value.
-        using DifferenceType = std::ptrdiff_t; ///< The difference type.
+        using IteratorCategory = RandomAccessIteratorTag;
+        using ValueType = T;
+        using DifferenceType = std::ptrdiff_t;
+        using Pointer = T *;
+        using Reference = T &;
     };
+
 
     /**
     * @class IteratorTraits
-    * @brief Specialization of IteratorTraits for const pointer types.
-    * @tparam T The type of the elements pointed to.
+    * @brief Traits class template for extracting iterator properties.
+    * Specialization for const pointer types.
+    * @tparam T The type of elements pointed to.
     */
     template<class T>
     class IteratorTraits<const T *, void> {
     public:
-        using IteratorCategory = RandomAccessIteratorTag; ///< Iterator category for const raw pointers.
-        using ValueType = T; ///< The value type of the pointer.
-        using Pointer = const T *; ///< The pointer type.
-        using Reference = T &; ///< The reference type.
-        using DifferenceType = std::ptrdiff_t; /// The difference type.
+        using IteratorCategory = RandomAccessIteratorTag;
+        using ValueType = T;
+        using DifferenceType = std::ptrdiff_t;
+        using Pointer = const T *;
+        using Reference = T &;
     };
 
     /**
-    * @class IsIterator
-    * @brief Helper class to determine if a type is an iterator by checking if it has `IteratorCategory`.
-    * @tparam T The type to be checked.
-    */
+   * @class IsIterator
+   * @brief Helper class to determine if a type is an iterator by checking if it has IteratorCategory.
+   * @tparam T The type to be checked.
+   */
     template<class T>
     class IsIterator {
     private:
@@ -199,16 +203,42 @@ namespace easystl {
     }
 
     /**
-    * @brief Calculates the distance between two input iterators.
+    * @concept IteratorConcept
+    * @brief Concept to check if a type T satisfies the Iterator concept (based on traits).
+    */
+    template<typename T>
+    concept IteratorConcept = requires(T iter)
+    {
+        typename IteratorTraits<T>::IteratorCategory;
+        typename IteratorTraits<T>::ValueType;
+        { *iter }; // Dereference
+    };
+
+    /**
+    * @concept InputIteratorConcept
+    * @brief Concept to check if a type T satisfies the InputIterator concept.
+    */
+    template<typename T>
+    concept InputIteratorConcept = IteratorConcept<T> && std::derived_from<
+                                       typename IteratorTraits<T>::IteratorCategory, InputIteratorTag>;
+
+    /**
+    * @concept RandomAccessIteratorConcept
+    * @brief Concept to check if a type T satisfies the RandomAccessIterator concept.
+    */
+    template<typename T>
+    concept RandomAccessIteratorConcept = IteratorConcept<T> && std::derived_from<
+                                              typename IteratorTraits<T>::IteratorCategory, RandomAccessIteratorTag>;
+
+    /**
+    * @brief Computes the distance between two input iterators.
     * @tparam InputIterator The type of the input iterator.
     * @param first The first iterator.
     * @param last The last iterator.
-    * @param{unnamed} The category tag for input iterators.
     * @return The distance between the two input iterators.
     */
-    template<class InputIterator>
-    auto _distance(InputIterator first, InputIterator last,
-                   InputIteratorTag) -> typename IteratorTraits<InputIterator>::DifferenceType {
+    template<InputIteratorConcept InputIterator>
+    auto Distance(InputIterator first, InputIterator last) -> typename IteratorTraits<InputIterator>::DifferenceType {
         typename IteratorTraits<InputIterator>::DifferenceType n = 0;
         while (first != last) {
             ++first;
@@ -218,52 +248,42 @@ namespace easystl {
     }
 
     /**
-    * @brief Calculates the distance between two input iterators.
+    * @brief Computes the distance between two random access iterators.
     * @tparam RandomAccessIterator The type of the random access iterator.
     * @param first The first iterator.
     * @param last The last iterator.
     * @return The distance between the two random access iterators.
     */
-    template<class RandomAccessIterator>
-    auto _distance(RandomAccessIterator first, RandomAccessIterator last, RandomAccessIteratorTag) {
+    template<RandomAccessIteratorConcept RandomAccessIterator>
+    auto Distance(RandomAccessIterator first,
+                  RandomAccessIterator last) -> typename IteratorTraits<RandomAccessIterator>::DifferenceType {
         return last - first;
     }
 
     /**
-    * @brief Computes the distance between two iterators.
+    * @brief Advances an input iterator by given distance.
     * @tparam InputIterator The type of the input iterator.
-    * @param first The first iterator.
-    * @param last The last iterator.
-    * @return The distance between the two iterators.
-    */
-    template<class InputIterator>
-    auto Distance(InputIterator first, InputIterator last) -> typename IteratorTraits<InputIterator>::DifferenceType {
-        return _distance(first, last, IteratorCategory(first));
-    }
-
-    /**
-    * @brief Advances an input iterator by a given distance.
-    * @tparam InputIterator The type of the input iterator.
-    * @tparam Distance The distance of the distance.
+    * @tparam Distance The type representing the distance to advance.
     * @param i The iterator to be advanced.
     * @param n The number of steps to advance.
-    * @param{unnamed} The category tag for input iterators.
     */
-    template<class InputIterator, class Distance>
-    auto _advance(InputIterator &i, Distance n, InputIteratorTag) -> void {
-        while (n--) { ++i; }
+    template<InputIteratorConcept InputIterator, typename Distance>
+    auto Advance(InputIterator &i, Distance n) -> void {
+        while (n--) {
+            ++i;
+        }
     }
 
     /**
-    * @brief Advance a bidirectional iterator by a given distance.
-    * @tparam BidirectionalIterator The type of the bidirectional iterator.
-    * @tparam Distance The distance of the distance.
+    * @brief Advances a bidirectional iterator by a given distance.
+    * @tparam InputIterator The type of the bidirectional iterator.
+    * @tparam Distance The type representing the distance to advance.
     * @param i The iterator to be advanced.
-    * @param n The number of steps to advanced.
-    * @param{unnamed} The category tag for bidirectional iterators.
+    * @param n The number of steps to advance.
     */
-    template<class BidirectionalIterator, class Distance>
-    auto _advance(BidirectionalIterator &i, Distance n, BidirectionalIteratorTag) -> void {
+    template<InputIteratorConcept InputIterator, typename Distance>
+        requires std::derived_from<typename IteratorTraits<InputIterator>::IteratorCategory, BidirectionalIteratorTag>
+    auto Advance(InputIterator &i, Distance n) -> void {
         if (n > 0) {
             while (n--) { ++i; }
         } else {
@@ -272,28 +292,15 @@ namespace easystl {
     }
 
     /**
-    * @brief Advance a random access iterator by a given distance.
+    * @brief Advances a random access iterator by given distance.
     * @tparam RandomAccessIterator The type of the random access iterator.
-    * @tparam Distance Ths distance of the distance.
-    * @param i The iterator to be advanced.
-    * @param n The number of steps to advanced.
-    * @param{unnamed} The category tag for random access iterators.
-    */
-    template<class RandomAccessIterator, class Distance>
-    auto _advance(RandomAccessIterator &i, Distance n, RandomAccessIteratorTag) -> void {
-        i += n;
-    }
-
-    /**
-    * @brief Advances an iterator by a given distance.
-    * @tparam InputIterator The type of the input iterator.
     * @tparam Distance The type representing the distance to advance.
     * @param i The iterator to be advanced.
     * @param n The number of steps to advance.
     */
-    template<class InputIterator, class Distance>
-    auto Advance(InputIterator &i, Distance n) -> void {
-        _advance(i, n, IteratorCategory(i));
+    template<RandomAccessIteratorConcept RandomAccessIterator, typename Distance>
+    auto Advance(RandomAccessIterator &i, Distance n) -> void {
+        i += n;
     }
 } // namespace easystl
 
